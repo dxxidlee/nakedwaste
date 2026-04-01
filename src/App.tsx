@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { ChangeEvent, KeyboardEvent } from 'react'
 import { jsPDF } from 'jspdf'
 import { Canvas } from './components/Canvas'
-import { useKeystroke } from './hooks/useKeystroke'
+import { isTrackedKey, useKeystroke } from './hooks/useKeystroke'
 
 const QUESTIONS = [
   'Describe a moment you felt completely alone.',
@@ -128,8 +129,8 @@ export default function App() {
   }, [ikis, text])
 
   useEffect(() => {
-    setText(currentResponse?.text ?? '')
-  }, [currentResponse?.text, setText])
+    setText(session.responses[session.currentQuestionIndex]?.text ?? '')
+  }, [session.currentQuestionIndex, setText])
 
   const captureSnapshot = useCallback((reason: SnapshotReason) => {
     const video = videoRef.current
@@ -185,8 +186,12 @@ export default function App() {
   }, [captureSnapshot])
 
   const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    (event: KeyboardEvent<HTMLTextAreaElement>) => {
       bind.onKeyDown?.(event)
+
+      if (!isTrackedKey(event)) {
+        return
+      }
 
       const hasFirstKeypressSnapshot = currentResponse.snapshots.some(
         snapshot => snapshot.reason === 'first-keypress',
@@ -202,7 +207,7 @@ export default function App() {
   )
 
   const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    (event: ChangeEvent<HTMLTextAreaElement>) => {
       bind.onChange?.(event)
     },
     [bind],

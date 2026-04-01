@@ -3,7 +3,7 @@ import type { ChangeEvent, KeyboardEvent, TextareaHTMLAttributes } from 'react'
 
 const EDITING_KEYS = new Set(['Backspace', 'Delete', 'Enter', 'Tab'])
 
-function isTrackedKey(event: KeyboardEvent<HTMLTextAreaElement>) {
+export function isTrackedKey(event: KeyboardEvent<HTMLTextAreaElement>) {
   if (
     event.metaKey ||
     event.ctrlKey ||
