@@ -1,0 +1,37 @@
+{
+  "name": "pause-portrait",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pause/Portrait prototype scaffold",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dxxidlee/nakedwaste.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dxxidlee/nakedwaste/issues"
+  },
+  "homepage": "https://github.com/dxxidlee/nakedwaste#readme",
+  "dependencies": {
+    "@chenglou/pretext": "^0.0.3",
+    "jspdf": "^4.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3"
+  }
+}
