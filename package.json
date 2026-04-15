@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/dxxidlee/nakedwaste#readme",
   "dependencies": {
+    "@mediapipe/selfie_segmentation": "^0.1.1675465747",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
