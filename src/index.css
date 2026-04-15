@@ -53,7 +53,7 @@ body {
 .webcam-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 0;
   pointer-events: none;
 }
@@ -61,7 +61,7 @@ body {
 .frame {
   width: 100vw;
   height: 100vh;
-  background: rgba(255, 255, 255, 0.5);
+  background: transparent;
   border-radius: 0;
   border: none;
   padding: 16px;
@@ -90,7 +90,7 @@ body {
 
 .typing-surface {
   border: none;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.12);
   padding: 8px;
   display: flex;
   flex-wrap: wrap;

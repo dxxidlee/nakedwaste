@@ -230,29 +230,37 @@ export default function App() {
       const frame = ctx.getImageData(0, 0, width, height)
       const { data } = frame
 
-      const bgR = Math.round(255 * (1 - t))
-      const bgG = Math.round(255 * t)
+      // Force a very dark background so subject brightness stands out.
+      const bgR = 1
+      const bgG = 1
+      const bgB = 1
+      const personMinLuma = 95
 
       for (let i = 0; i < data.length; i += 4) {
         // white = person, black = background in the mask (R channel)
-        const isPerson = !maskData || (maskData[i] ?? 0) > 128
+        // If mask is missing, default to background so scene stays flat.
+        const isPerson = !!maskData && (maskData[i] ?? 0) > 140
 
         if (isPerson) {
           const r = data[i] ?? 0
           const g = data[i + 1] ?? 0
           const b = data[i + 2] ?? 0
           const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
-          const value = Math.min(255, Math.max(0, luma))
-          // Thermal tint tied to typing speed
-          data[i]     = Math.round(value * (1 - t))
-          data[i + 1] = Math.round(value * t)
-          data[i + 2] = 0
+
+          // High-contrast white subject map.
+          const boosted = Math.max(0, luma - personMinLuma) * 4.6
+          const value = Math.min(255, Math.max(0, boosted))
+          const white = Math.min(255, 40 + value)
+
+          data[i] = white
+          data[i + 1] = white
+          data[i + 2] = white
           data[i + 3] = 255
         } else {
-          // Background → flat solid speed color
-          data[i]     = bgR
+          // Background -> fixed near-black
+          data[i] = bgR
           data[i + 1] = bgG
-          data[i + 2] = 0
+          data[i + 2] = bgB
           data[i + 3] = 255
         }
       }
