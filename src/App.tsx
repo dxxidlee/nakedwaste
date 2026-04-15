@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
+import type { SelfieSegmentation as SelfieSegmentationType, Results } from '@mediapipe/selfie_segmentation'
+
+declare global {
+  const SelfieSegmentation: typeof SelfieSegmentationType
+}
 
 const QUESTIONS = [
   'Describe a moment you felt completely alone.',
@@ -88,6 +93,9 @@ export default function App() {
   const streamRef = useRef<MediaStream | null>(null)
   const speedRef = useRef<number>(0.5)
   const displaySpeedRef = useRef<number>(0.5)
+  const segRef = useRef<SelfieSegmentationType | null>(null)
+  const segMaskRef = useRef<CanvasImageSource | null>(null)
+  const maskScaleCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -137,6 +145,27 @@ export default function App() {
   }, [ikis])
 
   useEffect(() => {
+    maskScaleCanvasRef.current = document.createElement('canvas')
+
+    const seg = new SelfieSegmentation({
+      locateFile: (file) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
+    })
+    seg.setOptions({ modelSelection: 1, selfieMode: false })
+    seg.onResults((results: Results) => {
+      segMaskRef.current = results.segmentationMask
+    })
+    seg.initialize().then(() => {
+      segRef.current = seg
+    }).catch(() => {})
+
+    return () => {
+      seg.close()
+      segRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
     let rafId = 0
 
     function renderInfrared() {
@@ -181,25 +210,58 @@ export default function App() {
       displaySpeedRef.current += (speedRef.current - displaySpeedRef.current) * 0.04
       const t = displaySpeedRef.current
 
+      // Scale the segmentation mask to match the video draw rect
+      let maskData: Uint8ClampedArray | null = null
+      const mask = segMaskRef.current
+      const maskCanvas = maskScaleCanvasRef.current
+      if (mask && maskCanvas) {
+        if (maskCanvas.width !== width || maskCanvas.height !== height) {
+          maskCanvas.width = width
+          maskCanvas.height = height
+        }
+        const maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true })
+        if (maskCtx) {
+          maskCtx.clearRect(0, 0, width, height)
+          maskCtx.drawImage(mask, offsetX, offsetY, drawWidth, drawHeight)
+          maskData = maskCtx.getImageData(0, 0, width, height).data
+        }
+      }
+
       const frame = ctx.getImageData(0, 0, width, height)
       const { data } = frame
 
+      const bgR = Math.round(255 * (1 - t))
+      const bgG = Math.round(255 * t)
+
       for (let i = 0; i < data.length; i += 4) {
-        const r = data[i] ?? 0
-        const g = data[i + 1] ?? 0
-        const b = data[i + 2] ?? 0
-        const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        // white = person, black = background in the mask (R channel)
+        const isPerson = !maskData || (maskData[i] ?? 0) > 128
 
-        const value = Math.min(255, Math.max(0, luma))
-
-        // Tint: slow → red (t=0), fast → green (t=1)
-        data[i]     = Math.round(value * (1 - t))
-        data[i + 1] = Math.round(value * t)
-        data[i + 2] = 0
-        data[i + 3] = 255
+        if (isPerson) {
+          const r = data[i] ?? 0
+          const g = data[i + 1] ?? 0
+          const b = data[i + 2] ?? 0
+          const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+          const value = Math.min(255, Math.max(0, luma))
+          // Thermal tint tied to typing speed
+          data[i]     = Math.round(value * (1 - t))
+          data[i + 1] = Math.round(value * t)
+          data[i + 2] = 0
+          data[i + 3] = 255
+        } else {
+          // Background → flat solid speed color
+          data[i]     = bgR
+          data[i + 1] = bgG
+          data[i + 2] = 0
+          data[i + 3] = 255
+        }
       }
 
       ctx.putImageData(frame, 0, 0)
+
+      // Send this frame to the segmentation model — result arrives next frame
+      segRef.current?.send({ image: video }).catch(() => {})
+
       rafId = window.requestAnimationFrame(renderInfrared)
     }
 
