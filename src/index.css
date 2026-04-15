@@ -1,13 +1,9 @@
-:root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #111111;
-  background: #f3f0ea;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@font-face {
+  font-family: "PPNeueMontreal";
+  src: url("/PPNeueMontreal-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: block;
 }
 
 * {
@@ -16,91 +12,141 @@
 
 body {
   margin: 0;
-}
-
-button,
-textarea {
-  font: inherit;
+  background: #0a0a0a;
+  color: #000000;
+  font-family: "PPNeueMontreal", Arial, sans-serif;
+  font-weight: 500;
 }
 
 #root {
   min-height: 100vh;
 }
 
-.app-shell {
+.app {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: minmax(320px, 420px) 1fr;
-  gap: 24px;
-  padding: 24px;
+  display: block;
+  padding: 0;
+  position: relative;
 }
 
-.controls,
-.preview {
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(17, 17, 17, 0.08);
-  border-radius: 20px;
-  padding: 24px;
-}
-
-.eyebrow {
-  margin: 0 0 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 12px;
-}
-
-h1 {
-  margin: 0 0 16px;
-  font-size: 30px;
-  line-height: 1.05;
-}
-
-.prompt {
-  margin: 0 0 16px;
-  font-size: 18px;
-}
-
-.response-input {
+.webcam-bg {
+  position: fixed;
+  inset: 0;
   width: 100%;
-  min-height: 220px;
-  resize: vertical;
-  border: 1px solid rgba(17, 17, 17, 0.15);
-  border-radius: 14px;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+  transform: scaleX(-1);
+}
+
+.webcam-source {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  top: -100px;
+  left: -100px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.webcam-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.2);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.frame {
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 0;
+  border: none;
   padding: 16px;
-  background: #fffdf9;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.question {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.1;
+  color: #fff;
+  font-family: "PPNeueMontreal", Arial, sans-serif;
+}
+
+.hidden-input {
+  position: fixed;
+  top: -9999px;
+  left: -9999px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.typing-surface {
+  border: none;
+  background: transparent;
+  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: flex-start;
+  overflow: auto;
+  min-height: 0;
+}
+
+.word-box {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid #000;
+  border-radius: 12px;
+  padding: 4px 9px;
+  margin-bottom: 3px;
+  background: rgba(217, 217, 217, 0.5);
+}
+
+.char-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.char {
+  display: inline-block;
+  font-size: 24px;
+  line-height: 1;
+  font-family: "PPNeueMontreal", Arial, sans-serif;
+}
+
+.gap-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4px;
 }
 
 .stats {
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin: 16px 0;
-  font-size: 14px;
+  align-items: center;
+  justify-content: space-between;
+  background: #000;
+  color: #fff;
+  border: 1px solid #3b3b3b;
+  font-size: 12px;
+  padding: 4px 8px;
+  font-family: "PPNeueMontreal", Arial, sans-serif;
 }
 
-button {
-  border: 0;
-  border-radius: 999px;
-  background: #111111;
-  color: #ffffff;
-  padding: 12px 18px;
+.submit {
+  border: 1px solid #fff;
+  background: #000;
+  color: #fff;
+  font-family: "PPNeueMontreal", Arial, sans-serif;
+  font-size: 12px;
+  padding: 2px 8px;
   cursor: pointer;
-}
-
-.preview {
-  overflow: auto;
-}
-
-.preview canvas {
-  width: 100%;
-  height: auto;
-  border-radius: 14px;
-  box-shadow: 0 16px 40px rgba(17, 17, 17, 0.08);
-}
-
-@media (max-width: 900px) {
-  .app-shell {
-    grid-template-columns: 1fr;
-  }
 }
